@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Elförbrukning – Idag</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin: 1rem;
+    }
+
+    canvas {
+      max-width: 100%;
+      height: 400px;
+    }
+  </style>
+</head>
+<body>
+  <h2>[ Today ]</h2>
+  <h3>Present</h3>
+  <canvas id="powerChart"></canvas>
+
+  <script>
+    async function hämtaData() {
+      const res = await fetch("/data");
+      const data = await res.json();
+
+      const tidsaxel = [];
+      const effekt = [];
+      const energi = [];
+
+      let cumulEnergy = 0;
+
+      data.forEach((rad, i) => {
+        const time = rad.timestamp.split(" ")[1]; // visa bara tid
+        const power = parseFloat(rad.power);
+
+        if (!isNaN(power)) {
+          cumulEnergy += power * (5 / 3600); // 5 sekunder mellan mätningar → kWh
+          tidsaxel.push(time);
+          effekt.push(power);
+          energi.push(cumulEnergy.toFixed(2));
+        }
+      });
+
+      const ctx = document.getElementById("powerChart").getContext("2d");
+
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: tidsaxel,
+          datasets: [
+            {
+              label: "Effekt (W)",
+              data: effekt,
+              borderWidth: 2,
+              yAxisID: 'y1',
+            },
+            {
+              label: "Ackumulerad Energi (kWh)",
+              data: energi,
+              borderWidth: 2,
+              borderDash: [5, 5],
+              yAxisID: 'y2',
+            }
+          ]
+        },
+        options: {
+          scales: {
+            y1: {
+              type: 'linear',
+              position: 'left',
+              title: {
+                display: true,
+                text: 'Watt'
+              }
+            },
+            y2: {
+              type: 'linear',
+              position: 'right',
+              title: {
+                display: true,
+                text: 'kWh'
+              },
+              grid: {
+                drawOnChartArea: false
+              }
+            }
+          }
+        }
+      });
+    }
+
+    hämtaData();
+  </script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plug4U</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 1rem;
+      text-align: center;
+    }
+
+    .status {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .portar {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+
+    .port {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .port button {
+      margin-top: 0.3rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+    }
+
+    .analysis {
+      margin-top: 2rem;
+    }
+
+    .analysis button {
+      display: block;
+      margin: 1rem auto;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+    }
+
+    @media (max-width: 600px) {
+      .portar {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="status">Plug4U is running!</div>
+
+  <div class="portar">
+    <div class="port">
+      <br>P1
+      <button onclick="togglePort(1, true)">ON</button>
+    </div>
+    <div class="port">
+      <br>P2
+      <button onclick="togglePort(2, true)">ON</button>
+    </div>
+    <div class="port">
+      <br>P3
+      <button onclick="togglePort(3, false)">OFF</button>
+    </div>
+    <div class="port">
+      <br>P4
+      <button onclick="togglePort(4, true)">ON</button>
+    </div>
+  </div>
+
+  <div class="analysis">
+    <h2>Analysis</h2>
+    <button onclick="location.href='/today'">Today</button>
+    <button onclick="location.href='/history'">History</button>
+  </div>
+
+  <script>
+    function togglePort(port, state) {
+      fetch(`/${state ? 'ON' : 'OFF'}?port=${port}`)
+        .then(res => res.text())
+        .then(data => alert(data));
+    }
+  </script>
+</body>
+</html>
