@@ -6,20 +6,24 @@
   <title>Plug4U</title>
   <style>
     body {
-      font-family: sans-serif;
-      margin: 1rem;
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
       text-align: center;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      color: #fff;
     }
 
     .status {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
+      font-size: 2rem;
+      margin: 2rem 0;
+      font-weight: bold;
     }
 
     .portar {
       display: flex;
       justify-content: center;
-      gap: 1rem;
+      gap: 2rem;
       flex-wrap: wrap;
       margin-bottom: 2rem;
     }
@@ -28,12 +32,34 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .port button {
-      margin-top: 0.3rem;
-      padding: 0.5rem 1rem;
+      margin-top: 0.5rem;
+      padding: 0.7rem 1.5rem;
       font-size: 1rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .port button.on {
+      background-color: #28a745;
+      color: #fff;
+    }
+
+    .port button.off {
+      background-color: #dc3545;
+      color: #fff;
+    }
+
+    .port button:hover {
+      transform: scale(1.05);
     }
 
     .analysis {
@@ -41,10 +67,27 @@
     }
 
     .analysis button {
-      display: block;
-      margin: 1rem auto;
+      display: inline-block;
+      margin: 1rem;
       padding: 1rem 2rem;
       font-size: 1.2rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background: #007bff;
+      color: #fff;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .analysis button:hover {
+      background: #0056b3;
+      transform: scale(1.05);
+    }
+
+    footer {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.7);
     }
 
     @media (max-width: 600px) {
@@ -53,14 +96,6 @@
         align-items: center;
       }
     }
-    .port button.on {
-  background-color: lightgreen;
-}
-
-.port button.off {
-  background-color: lightcoral;
-}
-
   </style>
 </head>
 <body>
@@ -69,32 +104,35 @@
   <div class="portar">
     <div class="port">
       P1
-      <button id="on-1" onclick="togglePort(1, true)">ON</button>
-      <button id="off-1" onclick="togglePort(1, false)">OFF</button>
+      <button id="on-1" class="on" onclick="togglePort(1, true)">ON</button>
+      <button id="off-1" class="off" onclick="togglePort(1, false)">OFF</button>
     </div>
     <div class="port">
       P2
-      <button id="on-2" onclick="togglePort(2, true)">ON</button>
-      <button id="off-2" onclick="togglePort(2, false)">OFF</button>
+      <button id="on-2" class="on" onclick="togglePort(2, true)">ON</button>
+      <button id="off-2" class="off" onclick="togglePort(2, false)">OFF</button>
     </div>
     <div class="port">
       P3
-      <button id="on-3" onclick="togglePort(3, true)">ON</button>
-      <button id="off-3" onclick="togglePort(3, false)">OFF</button>
+      <button id="on-3" class="on" onclick="togglePort(3, true)">ON</button>
+      <button id="off-3" class="off" onclick="togglePort(3, false)">OFF</button>
     </div>
     <div class="port">
       P4
-      <button id="on-4" onclick="togglePort(4, true)">ON</button>
-      <button id="off-4" onclick="togglePort(4, false)">OFF</button>
+      <button id="on-4" class="on" onclick="togglePort(4, true)">ON</button>
+      <button id="off-4" class="off" onclick="togglePort(4, false)">OFF</button>
     </div>
   </div>
   
-  
   <div class="analysis">
     <h2>Analysis</h2>
-    <button onclick="location.href='/today'">Today</button>
-    <button onclick="location.href='/history'">History</button>
+    <button onclick="location.href='/today.html'">Today</button>
+    <button onclick="location.href='/history.html'">History</button>
   </div>
+
+  <footer>
+    &copy; 2023 Plug4U. All rights reserved.
+  </footer>
 
   <script>
     function togglePort(port, state) {
@@ -102,22 +140,16 @@
         .then(res => res.text())
         .then(data => alert(data));
     }
-  </script>
-  <script>
-    function togglePort(port, state) {
-      fetch(`/${state ? 'ON' : 'OFF'}?port=${port}`)
-        .then(() => uppdateraStatus());
-    }
-  
+
     async function uppdateraStatus() {
       const res = await fetch("/portstatus");
       const status = await res.json();
-  
+
       Object.keys(status).forEach(port => {
         const isOn = status[port];
         const onBtn = document.getElementById(`on-${port}`);
         const offBtn = document.getElementById(`off-${port}`);
-  
+
         if (isOn) {
           onBtn.classList.add("on");
           onBtn.classList.remove("off");
@@ -131,9 +163,10 @@
         }
       });
     }
-  
-    setInterval(uppdateraStatus, 3000); // uppdatera var 3:e sekund
+
+    setInterval(uppdateraStatus, 3000); // Update every 3 seconds
     uppdateraStatus();
-  </script>  
+  </script>
 </body>
 </html>
+``` 
