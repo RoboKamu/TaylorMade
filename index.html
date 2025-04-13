@@ -38,6 +38,18 @@
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
+    .plug-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .outlet {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
     .port button {
       margin-top: 0.5rem;
       padding: 0.7rem 1.5rem;
@@ -103,22 +115,26 @@
 
   <div class="portar">
     <div class="port">
-      P1
+      <div class="plug-icon">🔌</div>
+      <div class="outlet">Outlet 1</div>
       <button id="on-1" class="on" onclick="togglePort(1, true)">ON</button>
       <button id="off-1" class="off" onclick="togglePort(1, false)">OFF</button>
     </div>
     <div class="port">
-      P2
+      <div class="plug-icon">🔌</div>
+      <div class="outlet">Outlet 2</div>
       <button id="on-2" class="on" onclick="togglePort(2, true)">ON</button>
       <button id="off-2" class="off" onclick="togglePort(2, false)">OFF</button>
     </div>
     <div class="port">
-      P3
+      <div class="plug-icon">🔌</div>
+      <div class="outlet">Outlet 3</div>
       <button id="on-3" class="on" onclick="togglePort(3, true)">ON</button>
       <button id="off-3" class="off" onclick="togglePort(3, false)">OFF</button>
     </div>
     <div class="port">
-      P4
+      <div class="plug-icon">🔌</div>
+      <div class="outlet">Outlet 4</div>
       <button id="on-4" class="on" onclick="togglePort(4, true)">ON</button>
       <button id="off-4" class="off" onclick="togglePort(4, false)">OFF</button>
     </div>
@@ -169,4 +185,3 @@
   </script>
 </body>
 </html>
-``` 
