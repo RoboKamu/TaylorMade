@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 CSV_FILE = "logg.csv"
 
-# Definiera portar – anpassa till dina GPIO-nr
+# Definiera portar – anpassa till dina GPIO-nr hehe
 
 def init_csv():
     if not os.path.exists(CSV_FILE):
