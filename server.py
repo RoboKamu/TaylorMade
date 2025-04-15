@@ -31,9 +31,13 @@ PORTS = {
 def home():
     return send_file("index.html")
 
-@app.route("/today")
+@app.route("/today.html")
 def today_view():
     return send_file("today.html")
+
+@app.route("/history.html")
+def history_view():
+    return send_file("history.html")
 
 
 @app.route("/ON")
