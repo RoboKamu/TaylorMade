@@ -8,10 +8,9 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-CSV_FILE = "logg.csv"
+CSV_FILE = "log.csv"
 
-# Definiera portar – anpassa till dina GPIO-nr hehe
-
+# Define ports – adjust to your GPIO numbers
 def init_csv():
     if not os.path.exists(CSV_FILE):
         with open(CSV_FILE, "w", newline="") as f:
@@ -20,8 +19,8 @@ def init_csv():
 
 init_csv()
 
-# Simulerad status för portar
-PORTAR = {
+# Simulated status for outlets
+PORTS = {
     "1": False,
     "2": False,
     "3": False,
@@ -40,22 +39,22 @@ def today_view():
 @app.route("/ON")
 def turn_on():
     port = request.args.get("port")
-    if port in PORTAR:
-        PORTAR[port] = True
-        return f"P{port} ON"
-    return "Ogiltig port", 400
+    if port in PORTS:
+        PORTS[port] = True
+        return f"Port {port} ON"
+    return "Invalid port", 400
 
 @app.route("/OFF")
 def turn_off():
     port = request.args.get("port")
-    if port in PORTAR:
-        PORTAR[port] = False
-        return f"P{port} OFF"
-    return "Ogiltig port", 400
+    if port in PORTS:
+        PORTS[port] = False
+        return f"Port {port} OFF"
+    return "Invalid port", 400
 
 @app.route("/portstatus")
 def port_status():
-    return jsonify(PORTAR)
+    return jsonify(PORTS)
 
 @app.route("/log", methods=["POST"])
 def log_data():
@@ -68,7 +67,7 @@ def log_data():
             data.get("current"),
             data.get("power")
         ])
-    return "Mätdata sparad!", 200
+    return "Measurement data saved!", 200
 
 @app.route("/data", methods=["GET"])
 def get_data():
@@ -78,3 +77,4 @@ def get_data():
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000)
+ 

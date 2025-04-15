@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Elförbrukning – Idag</title>
+  <title>Power Consumption – Today</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
@@ -19,29 +19,29 @@
 </head>
 <body>
   <h2>[ Today ]</h2>
-  <h3>Present</h3>
+  <h3>Live Data</h3>
   <canvas id="powerChart"></canvas>
 
   <script>
-    async function hämtaData() {
+    async function fetchData() {
       const res = await fetch("/data");
       const data = await res.json();
 
-      const tidsaxel = [];
-      const effekt = [];
-      const energi = [];
+      const timeLabels = [];
+      const powerValues = [];
+      const energyValues = [];
 
-      let cumulEnergy = 0;
+      let cumulativeEnergy = 0;
 
-      data.forEach((rad, i) => {
-        const time = rad.timestamp.split(" ")[1]; // visa bara tid
-        const power = parseFloat(rad.power);
+      data.forEach((row, i) => {
+        const time = row.timestamp.split(" ")[1]; // show only time
+        const power = parseFloat(row.power);
 
         if (!isNaN(power)) {
-          cumulEnergy += power * (5 / 3600); // 5 sekunder mellan mätningar → kWh
-          tidsaxel.push(time);
-          effekt.push(power);
-          energi.push(cumulEnergy.toFixed(2));
+          cumulativeEnergy += power * (5 / 3600); // 5 seconds interval → kWh
+          timeLabels.push(time);
+          powerValues.push(power);
+          energyValues.push(cumulativeEnergy.toFixed(2));
         }
       });
 
@@ -50,17 +50,17 @@
       new Chart(ctx, {
         type: "line",
         data: {
-          labels: tidsaxel,
+          labels: timeLabels,
           datasets: [
             {
-              label: "Effekt (W)",
-              data: effekt,
+              label: "Power (W)",
+              data: powerValues,
               borderWidth: 2,
               yAxisID: 'y1',
             },
             {
-              label: "Ackumulerad Energi (kWh)",
-              data: energi,
+              label: "Cumulative Energy (kWh)",
+              data: energyValues,
               borderWidth: 2,
               borderDash: [5, 5],
               yAxisID: 'y2',
@@ -93,7 +93,7 @@
       });
     }
 
-    hämtaData();
+    fetchData();
   </script>
 </body>
 </html>

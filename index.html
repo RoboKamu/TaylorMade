@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,7 +20,7 @@
       font-weight: bold;
     }
 
-    .portar {
+    .ports {
       display: flex;
       justify-content: center;
       gap: 2rem;
@@ -103,7 +103,7 @@
     }
 
     @media (max-width: 600px) {
-      .portar {
+      .ports {
         flex-direction: column;
         align-items: center;
       }
@@ -113,7 +113,7 @@
 <body>
   <div class="status">Plug4U is running!</div>
 
-  <div class="portar">
+  <div class="ports">
     <div class="port">
       <div class="plug-icon">🔌</div>
       <div class="outlet">Outlet 1</div>
@@ -157,7 +157,7 @@
         .then(data => alert(data));
     }
 
-    async function uppdateraStatus() {
+    async function updateStatus() {
       const res = await fetch("/portstatus");
       const status = await res.json();
 
@@ -180,8 +180,8 @@
       });
     }
 
-    setInterval(uppdateraStatus, 3000); // Update every 3 seconds
-    uppdateraStatus();
+    setInterval(updateStatus, 3000); // Update every 3 seconds
+    updateStatus();
   </script>
 </body>
 </html>
