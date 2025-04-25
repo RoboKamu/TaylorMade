@@ -9,7 +9,11 @@ The open souce project used from [linusreM](https://github.com/linusreM) was bas
 ----
 <br>
 
-----
+### Changes in makefile 
+add flags for USB in line 117
+
+    CFLAGS += -DUSE_USB -DUSE_USB_PRINTF #-fshort-wchar
+
 
 ### Extra note about CLOCK 
 The USB clock has to be configured as 48MHz according to the user manual. Read more in linusreM projects for more detail aswell as the user manual.

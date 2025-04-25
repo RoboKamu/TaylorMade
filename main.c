@@ -2,50 +2,39 @@
 #include "gd32vf103.h"
 #include "usb_serial_if.h"
 #include "usb_delay.h"
+#include "adc.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef USE_USB 
-    #define USE_USB
-#endif
-#ifndef USE_USB_PRINTF
-    #define USE_USB_PRINTF
-#endif
+#define USE_USB
+#define USE_USB_PRINTF
+
+extern uint16_t adc_value[];
 
 int main(void){
-    rcu_periph_clock_enable(RCU_GPIOB);
-    gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_2);
-    
-    uint32_t count = 0;
-    uint8_t usb_data_buffer[512] = {0};
-    /* GD32VF103 contains dedicated hardware for USB. To make sending data to and from a computer
-       the libraries in these examples includes a virtual com port driver. This lets the usb connection
-       on the devboard appear as a serial device which makes communication with a PC fairly simple.
-       
-       This example will listen for input from a serial terminal and when it you press enter it will print
-       back all it received in the same terminal.
-       
-       To test, connect the MCU-card to your computer and open a serial terminal (in platformIO press the icon in the bottom of the window)
-       and start typing, then press enter. */
+
+    // initialize adc 
+    adc_dma_init();
     
     /* This sets up so that the MCU will show up as a virtual com port when connected over usb to a computer */
     configure_usb_serial();
-    
+
     /* If the controller has sucessfully been connected usb_serial_available() will return 1 */
 	while(!usb_serial_available())usb_delay_1ms(10);
 
     while(1){
-        //Read new messages into buffer
-		// count = read_usb_serial(usb_data_buffer);
-        // if(count){
-        //     gpio_bit_write(GPIOB, GPIO_PIN_2, 1);
-        //     //If message was received, echo back to sender
-        //     printf("%s", usb_data_buffer);
-        //     //Make sure that message is actually sent and not cached
-        //     fflush(0);
-        // }
-        printf("Print values to Rapsberry pi listener here \n");
-        usb_delay_1ms(500);
+        usb_delay_1ms(100);
+        
+        adc_software_trigger_enable(ADC0, ADC_REGULAR_CHANNEL);
+    
+        printf("ADC0 regular channel scan mode, continous enable: \n");
+        
+        printf("ADC0 regular channel 1 data = %d \n", adc_value[0]);
+        printf("ADC0 regular channel 2 data = %d \n", adc_value[1]);
+        printf("ADC0 regular channel 3 data = %d \n", adc_value[2]);
+        printf("ADC0 regular channel 4 data = %d \n", adc_value[3]);
+        printf("ADC0 regular channel 5 data = %d \n", adc_value[4]);
+        fflush(0);
     }
 }

@@ -179,6 +179,6 @@ void set_usb_clock_96m_hxtal(void){
     /* wait until PLL is selected as system clock */
     while(0U == (RCU_CFG0 & RCU_SCSS_PLL)){
     }
-    //SystemCoreClock = 96000000;
+    // SystemCoreClock = 96000000;
     SystemCoreClockUpdate();
 }
