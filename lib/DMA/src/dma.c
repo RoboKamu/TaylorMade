@@ -1,3 +1,11 @@
+/*!
+    \file   dma.c
+    \brief  DMA driver implementation
+
+    The goal is to have DMA like a circular buffer, continously storing ADC data.
+    Once a defined amount of transers (signal periods) are completed, an interrupt is triggered.
+*/
+
 #include "dma.h"
 
 /*!
@@ -6,9 +14,7 @@
     \retval     none
 */
 void dma_config(void){
-    /** The idea is to have DMA like a circular buffer, continously storing.
-        Once x amount of periods have been transfered -> trigger interrupt. */
-    
+
     /** TODO: setup DMA to accuratly get sample x amount of periods */
 
     // enable DMA clock

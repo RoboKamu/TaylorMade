@@ -1,6 +1,16 @@
+/*!
+    \file   adc.c
+    \brief  ADC driver implementation
+
+    The idea is to have ADC in scan mode for 5 channels.
+    These 5 channels are samples continously and stored in DMA. 
+    
+    50 Hz input signal, 1 sample / ms on 5 channels => fs = 5*1 KHz = 5 KHz
+    Therefore, a conversion should occur every 200 micro seconds. 
+*/
+
 #include "adc.h"
 #include "dma.h"
-
 
 void rcu_config(void);
 void gpio_config(void);
@@ -56,10 +66,6 @@ void gpio_config(void){
     \retval     none
 */
 void adc_config(void){
-    /** The idea is to have ADC in scan mode for 5 channels.
-        These 5 channels are samples continously and stored in DMA. 
-        50 Hz input signal, 1 sample / ms on 5 channels => fs = 5*1 KHz = 5 KHz
-        a conversion should occur every 200 micro seconds. */
 
     /** TODO: features
      *  sooner:
@@ -68,6 +74,7 @@ void adc_config(void){
      *  later:
      *      Have 1 channel on ADC0 and 4 channels on ADC1 then synch 
      *      instead of ADC_MODE_FREE so channel 1 is parallell with every ADC1 channel
+     *      Then Voltage (A1) would be read in parallell with current (A2-A5) 
      */
 
     // reset ADC 
@@ -94,10 +101,9 @@ void adc_config(void){
     adc_external_trigger_source_config(ADC0, ADC_REGULAR_CHANNEL, ADC0_1_EXTTRIG_REGULAR_NONE);
     adc_external_trigger_config(ADC0, ADC_REGULAR_CHANNEL, ENABLE);
 
-
     /* 16 times sample, 4 bits shift */
-    adc_oversample_mode_config(ADC0, ADC_OVERSAMPLING_ALL_CONVERT, ADC_OVERSAMPLING_SHIFT_4B, ADC_OVERSAMPLING_RATIO_MUL16);
-    adc_oversample_mode_enable(ADC0);
+    // adc_oversample_mode_config(ADC0, ADC_OVERSAMPLING_ALL_CONVERT, ADC_OVERSAMPLING_SHIFT_4B, ADC_OVERSAMPLING_RATIO_MUL16);
+    // adc_oversample_mode_enable(ADC0);
 
     // enable ADC interface
     adc_enable(ADC0);
