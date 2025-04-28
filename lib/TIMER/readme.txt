@@ -1,0 +1,1 @@
+TIMER2 triggering a TRGO interrupt which triggers the ADC to start converting the 5 channels
