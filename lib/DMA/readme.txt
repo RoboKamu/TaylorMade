@@ -1,0 +1,1 @@
+DMA in circular mode with memory increase enable, for 5 ADC channels.  
