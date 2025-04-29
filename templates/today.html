@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Today's Power Consumption</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="data.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .chart-container {
+      width: 80%;
+      margin: 1rem auto;
+    }
+
+    canvas {
+      max-width: 100%;
+      height: 300px; /* Adjusted height to make graphs smaller */
+    }
+  </style>
+</head>
+<body>
+  <h1>Today's Power Consumption</h1>
+
+  <!-- Container for today's graph -->
+  <div class="chart-container">
+    <h2>Today (2025-04-26)</h2>
+    <canvas id="todayChart"></canvas>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 Plug4U. All rights reserved.</p>
+  </footer>
+
+  <script>
+    async function renderTodayChart() {
+      // Mock data for today's graph
+      const todayData = {
+        time: ['12:00', '12:05', '12:10', '12:15'],
+        Urms: [229, 230, 231, 232],
+        Irms: [5.2, 5.1, 5, 4.9],
+      };
+
+      const ctx = document.getElementById('todayChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: todayData.time,
+          datasets: [
+            {
+              label: 'Voltage (Urms)',
+              data: todayData.Urms,
+              borderColor: 'rgba(0, 123, 255, 1)', // Vibrant blue
+              borderWidth: 3, // Thicker line
+              fill: false,
+            },
+            {
+              label: 'Current (Irms)',
+              data: todayData.Irms,
+              borderColor: 'rgba(255, 69, 0, 1)', // Vibrant red-orange
+              borderWidth: 3, // Thicker line
+              fill: false,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Today (2025-04-26)',
+            },
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Time',
+              },
+              grid: {
+                color: 'rgba(0, 0, 0, 0.2)', // Black gridlines with slight transparency
+                lineWidth: 3, // Thicker gridlines
+              },
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Values',
+              },
+              grid: {
+                color: 'rgba(0, 0, 0, 0.2)', // Black gridlines with slight transparency
+                lineWidth: 3, // Thicker gridlines
+              },
+            },
+          },
+        },
+      });
+    }
+
+    renderTodayChart();
+  </script>
+</body>
+</html>
