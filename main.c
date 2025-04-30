@@ -41,11 +41,11 @@ int main(void){
             char ch5_buf[100]; size_t offset_ch5=0;
 
             for (uint8_t i=0; i<PERIOD_LENGTH; i++){
-                offset_ch1 += snprintf(ch1_buf+offset_ch1, 100-offset_ch1, "%d,", adc0_ch1_values[i]);
-                offset_ch2 += snprintf(ch2_buf+offset_ch2, 100-offset_ch2, "%d,", adc0_ch2_values[i]);
-                offset_ch3 += snprintf(ch3_buf+offset_ch3, 100-offset_ch3, "%d,", adc0_ch3_values[i]);
-                offset_ch4 += snprintf(ch4_buf+offset_ch4, 100-offset_ch4, "%d,", adc0_ch4_values[i]);
-                offset_ch5 += snprintf(ch5_buf+offset_ch5, 100-offset_ch5, "%d,", adc0_ch5_values[i]);
+                offset_ch1 += snprintf(ch1_buf+offset_ch1, 100-offset_ch1, "%d,", adc0_ch1_values[i]-2048);
+                offset_ch2 += snprintf(ch2_buf+offset_ch2, 100-offset_ch2, "%d,", adc0_ch2_values[i]-2048);
+                offset_ch3 += snprintf(ch3_buf+offset_ch3, 100-offset_ch3, "%d,", adc0_ch3_values[i]-2048);
+                offset_ch4 += snprintf(ch4_buf+offset_ch4, 100-offset_ch4, "%d,", adc0_ch4_values[i]-2048);
+                offset_ch5 += snprintf(ch5_buf+offset_ch5, 100-offset_ch5, "%d,", adc0_ch5_values[i]-2048);
             }
             
             // output =>  chx: 0,0,1,0.....,0 <-- 20 sample values
