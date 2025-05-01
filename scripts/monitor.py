@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 
 '''
+NOTE: WIP
+
 This scripts handles:
  - Reading ADC values over Serial port
  - Calculating RMS values 
@@ -8,9 +10,9 @@ This scripts handles:
  - Logging the calculations
 
  Idea:
-    Since wainting until a seocnd has passed then handling the data would be very inefficient this approach is diconinued.
+    Since wainting until a second has passed then handling the data would be very inefficient this approach is discontinued.
     A thought is to do real-time data analysis every 20ms, quick calculations on a peiod, save it and wait till the next one.
-    Once a second has passed (50 cycles) then the mean value of all relevat calculations is done.
+    Once a second has passed (50 cycles) then the mean value of all relevant real-time calculations is performed.
     example:
      - every 20ms calculate P (1 cycle)
      - after 1 second (50 cycles) calculate mean(P)
@@ -58,7 +60,7 @@ while True:
         else:
             I_rms = calc_rms(values)
         
-        if U_rms == 0:
+        #if U_rms == 0:
             
 
         

@@ -10,9 +10,11 @@ The open souce project used from [linusreM](https://github.com/linusreM) was bas
 <br>
 
 ### Changes in makefile 
-add flags for USB in line 117
+add flags for USB in line 117 directly after CFLAGS
 
-    CFLAGS += -DUSE_USB -DUSE_USB_PRINTF #-fshort-wchar
+    115. CFLAGS = $(ARCH) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wl,-Bstatic  -ffunction-sections -fdata-sections -fshort-wchar # -ffreestanding -nostdlib
+    116. # add flags for USB
+    117. CFLAGS += -DUSE_USB -DUSE_USB_PRINTF #-fshort-wchar
 
 
 ### Extra note about CLOCK 
