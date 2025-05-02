@@ -1,5 +1,9 @@
 ## Updates so far
 
+This branch has been merged to showcase recent updates. Please note that monitor.py is still a work in progress and active development continues on the monitor branch (can be found by clicking the "main" dropdown near the top-left of the GitHub repo and selecting monitor). 
+
+![alt text](image.png)
+
 ### Firmware
 
 Currently the firmware development is complete. One update that may occur is that the amount of periods/cycles being sampled increases, so going from sampling just one period (20 samples) to maybe 2 periods (40 samples) for more accurate RMS calculations and edge cases. 
@@ -30,6 +34,7 @@ Changing the port variable to read Serial port based on OS:
     # port = 'COM3'                 # ex. Windows - found via Device Manager -> Ports (COM & LPT) -> find something like "USB Serial Device (COM3)" 
 
 ### Hardware
+(this part might need to be updated)
 
 A PCB has been designed and printed for the power electronics.
 
