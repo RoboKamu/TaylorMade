@@ -1,5 +1,11 @@
 #!/usr/bin/python3
 
+'''
+This script listens to the Serial port and prints raw ADC data
+
+NOTE: this is just a test script, not meant for final project therefore no error handling
+'''
+
 import serial
 import time
 
@@ -12,5 +18,7 @@ print(f"Listening on {port}. Press Ctrl+C to exit. \n")
 time.sleep(1)
 
 while True:
-	byte_string = ser.readline()
+	# ser.reset_input_buffer()
+	byte_string = ser.read_all()
 	print(f"{byte_string.decode('utf-8').strip()} ", end='\n')
+	time.sleep(0.1)
