@@ -1,8 +1,9 @@
+TODO
+-----
+- [ ] update to cleaner website
+- [ ] real-time graphs on website 
+
 ## Updates so far
-
-This branch has been merged to showcase recent updates. Please note that monitor.py is still a work in progress and active development continues on the monitor branch (can be found by clicking the "main" dropdown near the top-left of the GitHub repo and selecting monitor). 
-
-![alt text](image.png)
 
 ### Firmware
 
@@ -32,6 +33,8 @@ Changing the port variable to read Serial port based on OS:
     port = '/dev/ttyACM0'           # for linux (debian)
     # port = /dev/tty.usbmodem1101  # ex. for MACOS - found via: ls /dev/tty.usb*
     # port = 'COM3'                 # ex. Windows - found via Device Manager -> Ports (COM & LPT) -> find something like "USB Serial Device (COM3)" 
+
+In `server.py`, the application uses pythons `threading.Thread` to read serial monitor in parallel with flask web server. While Python (3) does not have *true* parallell multi threading because of GIL, Gloabl Interpreter Lock, this design is not affected because both threads are primarly I/O bound. The Flask server spends most of its time idle, waiting for HTTP requests, so GIL gets released and another thread can continue execution. As a result, the two threads cooperate efficiently, providing responsive real-time behavior and clean data handling. 
 
 ### Hardware
 (this part might need to be updated)

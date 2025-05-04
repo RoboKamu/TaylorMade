@@ -26,11 +26,8 @@ except (ImportError, RuntimeError):
 
 
 
-from flask import Flask, request, jsonify, render_template, send_from_directory, redirect, url_for
-import csv
-import os
+from flask import Flask, request, jsonify, render_template, redirect, url_for
 import atexit
-from datetime import datetime
 #import RPi.GPIO as GPIO
 
 app = Flask(__name__)
@@ -100,5 +97,13 @@ def port_status():
 def cleanup():
     GPIO.cleanup()
 
+# configure Thread for power moonitor
+from classes.power_monitor import PowerMonitor
+from threading import Thread
+
+monitor = PowerMonitor()
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    t = Thread(target=monitor.run, daemon=True)
+    t.start()
+    app.run(host="0.0.0.0", port=5000)  # change host to router IP
