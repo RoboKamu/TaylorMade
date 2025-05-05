@@ -1,6 +1,7 @@
 TODO
 -----
 - [x] update to cleaner website
+- [ ] correctly read *voltage* (*current* is complete)
 - [ ] real-time graphs on website 
 
 ## Updates so far

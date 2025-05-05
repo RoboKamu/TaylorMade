@@ -8,17 +8,12 @@ import time     # to display time taken on calculations
 class PowerMonitor:
     def __init__(self):
         self.ROUND_NUM = 6
-        self.CYCLES = 25 # should be 50 cycles for 1 second
+        self.CYCLES = 50  # MCU sends data every 20ms, 50 cycles = 1 second
         self.cycle_counter = 0
         self.u_samples = np.array([])
         self.i = 0
         self.port = '/dev/ttyACM0'
         self.ser = serial.Serial(self.port, 115200, timeout=1)
-        self.lines = ["ch1: 1, 0, 1, 2, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,",
-    "ch2: 1, 0, 1, 2, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,",
-    "ch3: 1, 0, 1, 2, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,",
-    "ch4: 1, 0, 1, 2, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,",
-    "ch5: 1, 0, 1, 2, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,"]  # or use serial 
 
         # P = u*i in real time, then the mean is calculated after enough samples gathered
         # Other power calculations only need to be performed once
@@ -118,8 +113,6 @@ class PowerMonitor:
                     line = byte_string.decode('utf-8').strip()
                 except UnicodeDecodeError:
                     continue
-                # line = self.lines[self.i] # hardcoded lines dbg
-                # self.i = (self.i + 1) % 5
 
                 ch, values = self.parse_line(line)
                 if ch is None or ch not in self.channel_data_raw:

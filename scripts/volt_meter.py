@@ -34,7 +34,9 @@ while True:
     except:
         pass
     if parts[0] == 'ch1':
-        print(parts[0], "[V]: ", ", ".join(str(x) for x in values))
+
+        # 0.3848-2.8152, mitt 1.6 v
+        print(parts[0], "[V]: ", ", ".join(str((x)) for x in values))
     else:
         # current sensor has a 100mv = 1A resolution 
         # so values in volts => curent value = (reading value) / 0.1

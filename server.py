@@ -1,5 +1,6 @@
+# ----- ONLY WHEN NOT RUNNING ON PI -----
 try:
-    import RPi.GPIO as GPIO
+    import RPi.GPIO as GPIO 
 except (ImportError, RuntimeError):
     # Mock GPIO for testing without Raspberry Pi
     class GPIO:
@@ -23,7 +24,7 @@ except (ImportError, RuntimeError):
         @staticmethod
         def cleanup():
             print("GPIO cleanup()")
-
+# ---------- END ----------
 
 
 from flask import Flask, request, jsonify, render_template, redirect, url_for
@@ -106,4 +107,4 @@ monitor = PowerMonitor()
 if __name__ == "__main__":
     t = Thread(target=monitor.run, daemon=True)
     t.start()
-    app.run(host="0.0.0.0", port=5000)  # change host to router IP
+    app.run(host="0.0.0.0", port=5000)  # change host to router IP (the one given to RPi - found via ifconfig)
