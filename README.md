@@ -1,6 +1,6 @@
 TODO
 -----
-- [ ] update to cleaner website
+- [x] update to cleaner website
 - [ ] real-time graphs on website 
 
 ## Updates so far
