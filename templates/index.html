@@ -4,24 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Plug4U</title>
-  <link rel="stylesheet" href="styles.css">
-  <!DOCTYPE html>
-<html>
-<head>
-    <title>GPIO Button Status</title>
-    <meta http-equiv="refresh" content="2"> <!-- Auto-refresh every 2 seconds -->
-</head>
-<body>
-    <h1>GPIO Pin Status</h1>
-
-    {% for button_id, state in button_states.items() %}
-        <p>GPIO Pin {{ output_pins[button_id] }} (Button {{ button_id }}): <strong>{{ 'ON' if state else 'OFF' }}</strong></p>
-    {% endfor %}
-</body>
-</html>
+  <meta http-equiv="refresh" content="2"> <!-- Auto-refresh every 2 seconds -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
   <div class="status">Plug4U is running!</div>
+
+  <h1>GPIO Pin Status</h1>
+  {% for button_id, state in button_states.items() %}
+      <p>GPIO Pin {{ output_pins[button_id] }} (Button {{ button_id }}): 
+         <strong>{{ 'ON' if state else 'OFF' }}</strong></p>
+  {% endfor %}
 
   <div class="ports">
     <div class="port">

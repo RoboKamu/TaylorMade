@@ -6,16 +6,45 @@
   <title>Historical Power Consumption</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="data.js"></script>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #4facfe, #00f2fe); /* Same pleasing background */
+      color: #fff;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
     .chart-container {
       width: 80%;
       margin: 1rem auto;
+      background: #fff; /* White background for the graph */
+      border-radius: 10px; /* Rounded corners */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for better visibility */
+      padding: 1rem;
     }
 
     canvas {
       max-width: 100%;
       height: 300px; /* Adjusted height to make graphs smaller */
+    }
+
+    h1 {
+      margin: 1rem 0;
+    }
+
+    h2 {
+      margin: 1rem 0;
+      font-size: 1.8rem; /* Increased font size for the date */
+      color: #000; /* Set the date color to black for visibility */
+    }
+
+    footer {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.8);
     }
   </style>
 </head>
@@ -23,42 +52,34 @@
   <h1>Historical Power Consumption</h1>
 
   <!-- Containers for 7 graphs -->
-  <div class="chart-container">
-    <h2>Monday (2025-04-21)</h2>
-    <canvas id="historyChartMonday"></canvas>
-  </div>
-  <div class="chart-container">
-    <h2>Tuesday (2025-04-22)</h2>
-    <canvas id="historyChartTuesday"></canvas>
-  </div>
-  <div class="chart-container">
-    <h2>Wednesday (2025-04-23)</h2>
-    <canvas id="historyChartWednesday"></canvas>
-  </div>
-  <div class="chart-container">
-    <h2>Thursday (2025-04-24)</h2>
-    <canvas id="historyChartThursday"></canvas>
-  </div>
-  <div class="chart-container">
-    <h2>Friday (2025-04-25)</h2>
-    <canvas id="historyChartFriday"></canvas>
-  </div>
-  <div class="chart-container">
-    <h2>Saturday (2025-04-26)</h2>
-    <canvas id="historyChartSaturday"></canvas>
-  </div>
-  <div class="chart-container">
-    <h2>Sunday (2025-04-27)</h2>
-    <canvas id="historyChartSunday"></canvas>
-  </div>
+  <div id="charts"></div>
 
   <footer>
     <p>&copy; 2025 Plug4U. All rights reserved.</p>
   </footer>
 
   <script>
+    function getWeekDates() {
+      const today = new Date();
+      const currentDay = today.getDay(); // 0 (Sunday) to 6 (Saturday)
+      const monday = new Date(today);
+      monday.setDate(today.getDate() - currentDay + (currentDay === 0 ? -6 : 1)); // Adjust to Monday
+      const weekDates = [];
+
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + i);
+        weekDates.push({
+          day: date.toLocaleDateString('en-US', { weekday: 'long' }),
+          date: date.toISOString().split('T')[0], // Format as YYYY-MM-DD
+        });
+      }
+
+      return weekDates;
+    }
+
     async function renderHistoryCharts() {
-      // Mock data for demonstration purposes
+      const weekDates = getWeekDates();
       const mockData = {
         Monday: { time: ['12:00', '12:05', '12:10', '12:15'], Urms: [230, 231, 229, 230], Irms: [5, 4.8, 5.2, 5] },
         Tuesday: { time: ['12:00', '12:05', '12:10', '12:15'], Urms: [228, 229, 230, 231], Irms: [4.9, 5, 5.1, 5.2] },
@@ -69,20 +90,20 @@
         Sunday: { time: ['12:00', '12:05', '12:10', '12:15'], Urms: [230, 231, 232, 233], Irms: [5, 5.1, 5.2, 5.3] },
       };
 
-      const days = [
-        { id: 'historyChartMonday', label: 'Monday', date: '2025-04-21' },
-        { id: 'historyChartTuesday', label: 'Tuesday', date: '2025-04-22' },
-        { id: 'historyChartWednesday', label: 'Wednesday', date: '2025-04-23' },
-        { id: 'historyChartThursday', label: 'Thursday', date: '2025-04-24' },
-        { id: 'historyChartFriday', label: 'Friday', date: '2025-04-25' },
-        { id: 'historyChartSaturday', label: 'Saturday', date: '2025-04-26' },
-        { id: 'historyChartSunday', label: 'Sunday', date: '2025-04-27' },
-      ];
+      const chartsContainer = document.getElementById('charts');
+      weekDates.forEach(({ day, date }) => {
+        // Create chart container dynamically
+        const chartDiv = document.createElement('div');
+        chartDiv.className = 'chart-container';
+        chartDiv.innerHTML = `
+          <h2>${day}</h2> <!-- Only display the day -->
+          <canvas id="historyChart${day}"></canvas>
+        `;
+        chartsContainer.appendChild(chartDiv);
 
-      days.forEach(day => {
-        const dayData = mockData[day.label];
-
-        const ctx = document.getElementById(day.id).getContext('2d');
+        // Render chart
+        const dayData = mockData[day];
+        const ctx = document.getElementById(`historyChart${day}`).getContext('2d');
         new Chart(ctx, {
           type: 'line',
           data: {
@@ -109,7 +130,7 @@
             plugins: {
               title: {
                 display: true,
-                text: `${day.label} (${day.date})`,
+                text: `${day} (${date})`, // Display day and date in the chart title
               },
             },
             scales: {
