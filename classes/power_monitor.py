@@ -8,17 +8,12 @@ import time     # to display time taken on calculations
 class PowerMonitor:
     def __init__(self):
         self.ROUND_NUM = 6
-        self.CYCLES = 25 # should be 50 cycles for 1 second
+        self.CYCLES = 50  # MCU sends data every 20ms, 50 cycles = 1 second
         self.cycle_counter = 0
         self.u_samples = np.array([])
         self.i = 0
         self.port = '/dev/ttyACM0'
         self.ser = serial.Serial(self.port, 115200, timeout=1)
-        self.lines = ["ch1: 1, 0, 1, 2, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,",
-    "ch2: 1, 0, 1, 2, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,",
-    "ch3: 1, 0, 1, 2, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,",
-    "ch4: 1, 0, 1, 2, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,",
-    "ch5: 1, 0, 1, 2, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,"]  # or use serial 
 
         # P = u*i in real time, then the mean is calculated after enough samples gathered
         # Other power calculations only need to be performed once
@@ -42,7 +37,22 @@ class PowerMonitor:
         os.makedirs("logs", exist_ok=True)
 
     def calc_rms(self, samples):
-        return np.sqrt(np.mean(np.square(samples)))
+        y = np.asarray(samples)
+        X = np.fft.fft(y) # compute fft 
+        N = len(X)
+        fs = 1000
+        freq_axis = np.fft.fftfreq(N, d=1/fs)
+        # remove bins under threshold
+        threshold = 0.1
+        X_filtered = X.copy()
+        X_filtered[np.abs(X_filtered) < threshold * (N//2+1)] = 0
+        # band pass filter
+        low_cutoff = 1 # Hz
+        high_cutoff = 455 # Hz
+        X_filtered[(np.abs(freq_axis) < low_cutoff) | (np.abs(freq_axis) > high_cutoff)] = 0
+        y_recon = np.fft.ifft(X_filtered).real  # Reconstructed signal (same as input with noise)
+
+        return np.sqrt(np.mean(np.square(y_recon)))
 
     def calc_active_power(self, u, i):
         u = np.asarray(u)
@@ -54,33 +64,38 @@ class PowerMonitor:
         if len(parts) != 2:
             return None, np.array([])
         try:
-            data = np.array([ (3.3*float(x)/4095) for x in parts[1].split(',') if x.strip() != ''])
+            if parts[0] != 'ch1':
+                data = np.array([ (3.3*float(x)/4095) for x in parts[1].split(',') if x.strip() != ''])
+                # convert voltage reading from current sensor: 100mv = 1A
+                data = np.divide(data, 0.1)
+            else:
+                data = np.array([float(x) for x in parts[1].split(',') if x.strip() != ''])
+                tmp = np.mean(data)
+                data = 1625*(3.3*(data-tmp)/4096) 
         except ValueError:
             return None, np.array([])
         
-        if parts[0] != 'ch1':
-            # convert voltage reading from current sensor: 100mv = 1A
-            data = np.divide(data, 0.1)
         return parts[0], data
 
     def calc_power(self, ch):
         if ch == "ch1":
-            self.channel_data_result[ch]["Urms"] = round(np.sum(self.channel_data_raw[ch]["Urms"]), self.ROUND_NUM)
+            self.channel_data_result[ch]["Urms"] = np.sum(self.channel_data_raw[ch]["Urms"]) / len(self.channel_data_raw[ch]["Urms"])
+            self.channel_data_result[ch]["Urms"] = round(self.channel_data_result[ch]["Urms"], self.ROUND_NUM)
             return
 
         Irms_array = np.asarray(self.channel_data_raw[ch]["Irms"])
         P_array = np.asarray(self.channel_data_raw[ch]["P"])
         Urms_val = self.channel_data_result["ch1"]["Urms"]
 
-        Irms_sum = np.sum(Irms_array)
-        P_sum = np.sum(P_array)
-        S = Urms_val * Irms_sum
-        Q_mag = np.sqrt(abs(S**2 - P_sum**2))
-        PF = P_sum / S if S != 0 else None
+        Irms_m = np.sum(Irms_array) / len(Irms_array)
+        P_m = np.sum(P_array) / len(P_array)
+        S = Urms_val * Irms_m
+        Q_mag = np.sqrt(abs(S**2 - P_m**2))
+        PF = P_m / S if S != 0 else None
 
         self.channel_data_result[ch].update({
-            "Irms": round(Irms_sum, self.ROUND_NUM),
-            "P": round(P_sum, self.ROUND_NUM),
+            "Irms": round(Irms_m, self.ROUND_NUM),
+            "P": round(P_m, self.ROUND_NUM),
             "S": round(S, self.ROUND_NUM),
             "Q": round(Q_mag, self.ROUND_NUM),
             "PF": round(PF, self.ROUND_NUM)
@@ -104,6 +119,9 @@ class PowerMonitor:
         for ch in self.channel_data_raw:
             for key in self.channel_data_raw[ch]:
                 self.channel_data_raw[ch][key].clear()
+        for ch in self.channel_data_result:
+            for key in self.channel_data_result[ch]:
+                self.channel_data_result[ch][key] = 0
 
     def display_monitor(self):
         for ch, vals in self.channel_data_result.items():
@@ -116,22 +134,25 @@ class PowerMonitor:
                 byte_string = self.ser.readline()
                 try:
                     line = byte_string.decode('utf-8').strip()
+ #                   print("pass")
                 except UnicodeDecodeError:
+ #                   print("fail")
                     continue
-                # line = self.lines[self.i] # hardcoded lines dbg
-                # self.i = (self.i + 1) % 5
 
                 ch, values = self.parse_line(line)
                 if ch is None or ch not in self.channel_data_raw:
                     continue
 
+#                print(f"{ch}:{values}")
                 if ch == 'ch1':
+#                    print("Hej 1")
                     if len(values) != 20: continue
                     self.u_samples = values
                     self.channel_data_raw[ch]["Urms"].append(self.calc_rms(values))
                     continue
                 
                 if len(values) != 20 or len(self.u_samples) != 20:
+#                    print("Hej 2")
                     continue    # skip if either set incomplete
 
                 self.channel_data_raw[ch]["Irms"].append(self.calc_rms(values))
@@ -139,6 +160,7 @@ class PowerMonitor:
 
                 if ch == 'ch5':
                     self.cycle_counter += 1
+#                    print("antal cycles: ", self.cycle_counter)
                     if self.cycle_counter == self.CYCLES:
                         self.cycle_counter = 0
                         for ch_key in self.channel_data_raw:

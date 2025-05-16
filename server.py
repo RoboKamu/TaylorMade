@@ -1,44 +1,17 @@
-try:
-    import RPi.GPIO as GPIO
-except (ImportError, RuntimeError):
-    # Mock GPIO for testing without Raspberry Pi
-    class GPIO:
-        BCM = "BCM"
-        OUT = "OUT"
-        HIGH = "HIGH"
-        LOW = "LOW"
-
-        @staticmethod
-        def setmode(mode):
-            print(f"GPIO setmode({mode})")
-
-        @staticmethod
-        def setup(pin, mode):
-            print(f"GPIO setup(pin={pin}, mode={mode})")
-
-        @staticmethod
-        def output(pin, state):
-            print(f"GPIO output(pin={pin}, state={state})")
-
-        @staticmethod
-        def cleanup():
-            print("GPIO cleanup()")
-
-
 
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 import atexit
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 app = Flask(__name__)
 
 # Set up GPIO
 GPIO.setmode(GPIO.BCM)
 output_pins = {
-    1: 17,
-    2: 18,
-    3: 27,
-    4: 22,
+    1: 27,
+    2: 22,
+    3: 23,
+    4: 24,
 }
 
 # Set up all pins as outputs
@@ -106,4 +79,4 @@ monitor = PowerMonitor()
 if __name__ == "__main__":
     t = Thread(target=monitor.run, daemon=True)
     t.start()
-    app.run(host="0.0.0.0", port=5000)  # change host to router IP
+    app.run(host="0.0.0.0", port=5050)  # change host to router IP
