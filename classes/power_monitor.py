@@ -36,7 +36,7 @@ class PowerMonitor:
 
         os.makedirs("logs", exist_ok=True)
 
-    def calc_rms(self, samples):
+    def calc_rms(self, samples, ch):
         # flatten 2d array to 1d in order to perform DFT
         flattened = [value for row in samples for value in row]
         y = np.asarray(flattened)
@@ -45,7 +45,7 @@ class PowerMonitor:
         fs = 1000
         freq_axis = np.fft.fftfreq(N, d=1/fs)
         # remove bins under threshold
-        threshold = 0.03
+        threshold = 0.03 if ch != "ch1" else 5.0
         X_filtered = X.copy()
         X_filtered[np.abs(X_filtered) < threshold * (N//2+1)] = 0
         # band pass filter
@@ -73,7 +73,7 @@ class PowerMonitor:
             else:
                 data = np.asarray([float(x) for x in parts[1].split(',') if x.strip() != ''])
                 tmp = np.mean(data)
-                data = 1625*(3.3*(data-tmp)/4095) 
+                data = 1617*(3.3*(data-tmp)/4095) 
         except ValueError:
             return None, np.array([])
         
@@ -81,14 +81,14 @@ class PowerMonitor:
 
     def calc_power(self, ch):
         if ch == "ch1":
-            self.channel_data_result[ch]["Urms"] = self.calc_rms(self.channel_data_raw[ch]["Urms"])
+            self.channel_data_result[ch]["Urms"] = self.calc_rms(self.channel_data_raw[ch]["Urms"], ch)
             return
 
         Irms_array = np.asarray(self.channel_data_raw[ch]["Irms"])
         P_array = np.asarray(self.channel_data_raw[ch]["P"])
         Urms_val = self.channel_data_result["ch1"]["Urms"]
 
-        Irms_m = self.calc_rms(Irms_array)
+        Irms_m = self.calc_rms(Irms_array, ch)
         if Irms_m == 0.0:
             self.channel_data_result[ch].update({
                 "Irms": 0.0,
