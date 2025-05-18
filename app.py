@@ -43,7 +43,7 @@ def today_view():
     timestamp = datetime.now().replace(microsecond=0)
     date_path = timestamp.strftime("logs/%Y/%m/%d")
 
-    measurements = ["Irms", "P", "Q", "S", "PF"]
+    measurements = ["Urms", "Irms", "P", "Q", "S", "PF"]
     chart_images = {}
     
 
@@ -115,7 +115,7 @@ def turn_off():
     port = int(request.args.get("port"))
     button_states[port] = False
     GPIO.output(output_pins[port], GPIO.LOW)
-    return f"Port {port} turned OFF"
+    return '', 204
 
 @app.route("/portstatus")
 def port_status():
