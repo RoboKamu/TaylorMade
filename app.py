@@ -1,31 +1,3 @@
-# ----- ONLY WHEN NOT RUNNING ON PI -----
-try:
-    import RPi.GPIO as GPIO 
-except (ImportError, RuntimeError):
-    # Mock GPIO for testing without Raspberry Pi
-    class GPIO:
-        BCM = "BCM"
-        OUT = "OUT"
-        HIGH = "HIGH"
-        LOW = "LOW"
-
-        @staticmethod
-        def setmode(mode):
-            print(f"GPIO setmode({mode})")
-
-        @staticmethod
-        def setup(pin, mode):
-            print(f"GPIO setup(pin={pin}, mode={mode})")
-
-        @staticmethod
-        def output(pin, state):
-            print(f"GPIO output(pin={pin}, state={state})")
-
-        @staticmethod
-        def cleanup():
-            print("GPIO cleanup()")
-# ---------- END ----------
-
 import base64
 from datetime import datetime
 from io import BytesIO
@@ -36,7 +8,7 @@ import atexit
 
 from matplotlib.figure import Figure
 import matplotlib.dates as mdates
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 app = Flask(__name__)
 
