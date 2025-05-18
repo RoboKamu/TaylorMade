@@ -6,98 +6,88 @@
   <title>Today's Power Consumption</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="data.js"></script>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #4facfe, #00f2fe); /* Same pleasing background */
+      color: #fff;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
     .chart-container {
       width: 80%;
       margin: 1rem auto;
+      background: #fff; /* White background for the graph */
+      border-radius: 10px; /* Rounded corners */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for better visibility */
+      padding: 1rem;
     }
 
     canvas {
       max-width: 100%;
       height: 300px; /* Adjusted height to make graphs smaller */
     }
+
+    h1 {
+      margin: 1rem 0;
+    }
+
+    h2 {
+      margin: 1rem 0;
+      color: #000; /* Set the date color to black */
+    }
+
+    footer {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
   </style>
 </head>
 <body>
   <h1>Today's Power Consumption</h1>
 
-  <!-- Container for today's graph -->
-  <div class="chart-container">
-    <h2>Today (2025-04-26)</h2>
-    <canvas id="todayChart"></canvas>
-  </div>
+  {% if charts %}
+    
+    {% for measurement, chart_data in charts.items() %}
+      <!-- Container for today's graph -->
+      <div class="chart-container">
+        <h2 id="todayDate"> Chart {{ measurement }} </h2>
+        <!-- <canvas id="todayChart"></canvas> -->
+        <img src="data:image/png;base64, {{ chart_data }}" alt="Chart {{ measurement }}">
+      </div>
+    {% endfor %}
+
+  {% else %}
+    <p>No Data available for today</p>
+  {% endif %}
 
   <footer>
-    <p>&copy; 2025 Plug4U. All rights reserved.</p>
+    <p>&copy; 2025 TaylorMade.</p>
   </footer>
 
   <script>
-    async function renderTodayChart() {
-      // Mock data for today's graph
-      const todayData = {
-        time: ['12:00', '12:05', '12:10', '12:15'],
-        Urms: [229, 230, 231, 232],
-        Irms: [5.2, 5.1, 5, 4.9],
-      };
-
-      const ctx = document.getElementById('todayChart').getContext('2d');
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: todayData.time,
-          datasets: [
-            {
-              label: 'Voltage (Urms)',
-              data: todayData.Urms,
-              borderColor: 'rgba(0, 123, 255, 1)', // Vibrant blue
-              borderWidth: 3, // Thicker line
-              fill: false,
-            },
-            {
-              label: 'Current (Irms)',
-              data: todayData.Irms,
-              borderColor: 'rgba(255, 69, 0, 1)', // Vibrant red-orange
-              borderWidth: 3, // Thicker line
-              fill: false,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            title: {
-              display: true,
-              text: 'Today (2025-04-26)',
-            },
-          },
-          scales: {
-            x: {
-              title: {
-                display: true,
-                text: 'Time',
-              },
-              grid: {
-                color: 'rgba(0, 0, 0, 0.2)', // Black gridlines with slight transparency
-                lineWidth: 3, // Thicker gridlines
-              },
-            },
-            y: {
-              title: {
-                display: true,
-                text: 'Values',
-              },
-              grid: {
-                color: 'rgba(0, 0, 0, 0.2)', // Black gridlines with slight transparency
-                lineWidth: 3, // Thicker gridlines
-              },
-            },
-          },
-        },
+    // Function to dynamically set today's date
+    function setTodayDate() {
+      const today = new Date();
+      const formattedDate = today.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
       });
+      document.getElementById('todayDate').textContent = `Today (${formattedDate})`;
     }
 
-    renderTodayChart();
+    // Set today's date
+    setTodayDate();
+    setInterval(() => {
+      window.location.reload();
+    }, 1000); // reload every second
   </script>
+
 </body>
 </html>
