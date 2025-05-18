@@ -81,8 +81,6 @@ class PowerMonitor:
 
     def calc_power(self, ch):
         if ch == "ch1":
-            # self.channel_data_result[ch]["Urms"] = np.sum(self.channel_data_raw[ch]["Urms"]) / len(self.channel_data_raw[ch]["Urms"])
-            # self.channel_data_result[ch]["Urms"] = self.channel_data_result[ch]["Urms"]
             self.channel_data_result[ch]["Urms"] = self.calc_rms(self.channel_data_raw[ch]["Urms"])
             return
 
@@ -91,18 +89,27 @@ class PowerMonitor:
         Urms_val = self.channel_data_result["ch1"]["Urms"]
 
         Irms_m = self.calc_rms(Irms_array)
-        P_m = np.sum(P_array) / len(P_array)
-        S = Urms_val * Irms_m
-        Q_mag = np.sqrt(abs(S**2 - P_m**2))
-        PF = P_m / S if S != 0 else 0.0
+        if Irms_m == 0.0:
+            self.channel_data_result[ch].update({
+                "Irms": 0.0,
+                "P": 0.0,
+                "S": 0.0,
+                "Q": 0.0,
+                "PF": 0
+            })  
+        else:  
+            P_m = np.sum(P_array) / len(P_array)
+            S = Urms_val * Irms_m
+            Q_mag = np.sqrt(abs(S**2 - P_m**2))
+            PF = P_m / S if S != 0 else 0.0
 
-        self.channel_data_result[ch].update({
-            "Irms": Irms_m,
-            "P": P_m,
-            "S": S,
-            "Q": Q_mag,
-            "PF": PF
-        })
+            self.channel_data_result[ch].update({
+                "Irms": Irms_m,
+                "P": P_m,
+                "S": S,
+                "Q": Q_mag,
+                "PF": PF
+            })
 
     def log_to_csv(self):
         timestamp = datetime.now().replace(microsecond=0)
@@ -137,33 +144,27 @@ class PowerMonitor:
                 byte_string = self.ser.readline()
                 try:
                     line = byte_string.decode('utf-8').strip()
- #                   print("pass")
                 except UnicodeDecodeError:
- #                   print("fail")
                     continue
 
                 ch, values = self.parse_line(line)
                 if ch is None or ch not in self.channel_data_raw:
                     continue
 
-#                print(f"{ch}:{values}")
                 if ch == 'ch1':
-#                    print("Hej 1")
                     if len(values) != 20: continue
                     self.u_samples = values
                     self.channel_data_raw[ch]["Urms"].append(values)
                     continue
                 
                 if len(values) != 20 or len(self.u_samples) != 20:
-#                    print("Hej 2")
                     continue    # skip if either set incomplete
 
                 self.channel_data_raw[ch]["Irms"].append(values)
-                self.channel_data_raw[ch]["P"].append(self.calc_active_power(self.u_samples, values))
+                self.channel_data_raw[ch]["P"].append(self.calc_active_power(self.u_samples, values*(-1)))
 
                 if ch == 'ch5':
                     self.cycle_counter += 1
-#                    print("antal cycles: ", self.cycle_counter)
                     if self.cycle_counter == self.CYCLES:
                         self.cycle_counter = 0
                         for ch_key in self.channel_data_raw:
