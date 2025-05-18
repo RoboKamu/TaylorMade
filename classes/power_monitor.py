@@ -7,7 +7,7 @@ import time     # to display time taken on calculations
 
 class PowerMonitor:
     def __init__(self):
-        self.ROUND_NUM = 6
+        self.ROUND_NUM = 3
         self.CYCLES = 50  # MCU sends data every 20ms, 50 cycles = 1 second
         self.cycle_counter = 0
         self.u_samples = np.array([])
@@ -81,7 +81,8 @@ class PowerMonitor:
 
     def calc_power(self, ch):
         if ch == "ch1":
-            self.channel_data_result[ch]["Urms"] = self.calc_rms(self.channel_data_raw[ch]["Urms"], ch)
+            Urms_val = self.calc_rms(self.channel_data_raw[ch]["Urms"], ch)
+            self.channel_data_result[ch]["Urms"] = round(Urms_val, 1)
             return
 
         Irms_array = np.asarray(self.channel_data_raw[ch]["Irms"])
@@ -104,11 +105,11 @@ class PowerMonitor:
             PF = P_m / S if S != 0 else 0.0
 
             self.channel_data_result[ch].update({
-                "Irms": Irms_m,
-                "P": P_m,
-                "S": S,
-                "Q": Q_mag,
-                "PF": PF
+                "Irms": round(Irms_m, ROUND_NUM),
+                "P": round(P_m, ROUND_NUM),
+                "S": round(S, ROUND_NUM),
+                "Q": round(Q_mag, ROUND_NUM),
+                "PF": round(PF, ROUND_NUM)
             })
 
     def log_to_csv(self):
