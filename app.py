@@ -57,9 +57,6 @@ def today_view():
             ch_name = os.path.splitext(file)[0] # ex. "ch2"
             filepath = os.path.join(date_path, file)
             df = pd.read_csv(filepath, parse_dates=["timestamp"])
-            # remove the date from timestamp    
-            # df["timestamp"] = pd.to_datetime(df["timestamp"])
-            # df["timestamp"] = df["timestamp"].dt.strftime("%H:%M:%S")
 
             for m in measurements:
                 if m in df.columns:
@@ -72,12 +69,7 @@ def today_view():
 
             for ch, (x, y) in ch_data.items():
                 ax.plot(x, y, label=ch)
-            
-            # dynamic x axis 
-            # locator = mdates.AutoDateLocator()
-            # formatter = mdates.AutoDateFormatter(locator)
 
-            # ax.xaxis.set_major_locator(locator)
             ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
             fig.autofmt_xdate()
 
@@ -116,7 +108,6 @@ def turn_on():
     port = int(request.args.get("port"))
     button_states[port] = True
     GPIO.output(output_pins[port], GPIO.HIGH)
-#    return f"Port {port} turned ON"
     return '', 204
 
 @app.route("/OFF")
