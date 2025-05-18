@@ -105,11 +105,11 @@ class PowerMonitor:
             PF = P_m / S if S != 0 else 0.0
 
             self.channel_data_result[ch].update({
-                "Irms": round(Irms_m, ROUND_NUM),
-                "P": round(P_m, ROUND_NUM),
-                "S": round(S, ROUND_NUM),
-                "Q": round(Q_mag, ROUND_NUM),
-                "PF": round(PF, ROUND_NUM)
+                "Irms": round(Irms_m, self.ROUND_NUM),
+                "P": round(P_m, self.ROUND_NUM),
+                "S": round(S, self.ROUND_NUM),
+                "Q": round(Q_mag, self.ROUND_NUM),
+                "PF": round(PF, self.ROUND_NUM)
             })
 
     def log_to_csv(self):
