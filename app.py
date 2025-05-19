@@ -74,7 +74,7 @@ def today_view():
             fig.autofmt_xdate()
 
             ax.set_title(f"Chart {m}")
-            ax.legend()
+            ax.legend(loc='upper left')
             fig.tight_layout()
 
             # convert plot to PNG image as base64
