@@ -1,10 +1,5 @@
-TODO
------
-- [x] update to cleaner website
-- [ ] correctly read *voltage* (*current* is complete)
-- [ ] real-time graphs on website 
-
-## Updates so far
+> [!NOTE]
+> Main prototype complete but a revision of the web software as well as the hardware is in progress.
 
 ### Firmware
 
@@ -22,35 +17,33 @@ Firmware overview:
 
 ### Software
 
-The website is still being developed. Getting the flask server running and controlling raspberry pi ports works, but the frontend and data analysis is still being developed.
+The website is still being developed. Getting the flask server running, controlling raspberry pi GPIO, and data analysis works but some frontend features like "history" and WSGI server is in development. 
 
 While it is in development, some small scrips have been created to just read the Serial port readings
 
-**NOTE: I have developed the firmware and python scripts in a GNU/Linux enviorment so if new firmware is desired then the Makefile has to be swapped and the python script port has to be changed**
+**NOTE: I have developed the firmware and python scripts in a GNU/Linux enviorment so if new firmware is desired then the Makefile has to be swapped and the python script port variable has to be changed**
 
 Changing the port variable to read Serial port based on OS:
 
     port = '' # change this to serial port location variable
     port = '/dev/ttyACM0'           # for linux (debian)
     # port = /dev/tty.usbmodem1101  # ex. for MACOS - found via: ls /dev/tty.usb*
-    # port = 'COM3'                 # ex. Windows - found via Device Manager -> Ports (COM & LPT) -> find something like "USB Serial Device (COM3)" 
+    # port = 'COM3'                 # ex. Windows - found via Device Manager -> Ports (COM & LPT) -> find something like "USB Serial Device (COM3)" (?)
 
-In `server.py`, the application uses pythons `threading.Thread` to read serial monitor in parallel with flask web server. While Python (3) does not have *true* parallell multi threading because of GIL, Gloabl Interpreter Lock, this design is not affected because both threads are primarly I/O bound. The Flask server spends most of its time idle, waiting for HTTP requests, so GIL gets released and another thread can continue execution. As a result, the two threads cooperate efficiently, providing responsive real-time behavior and clean data handling. 
+In `app.py`, the application uses pythons `threading.Thread` to read serial monitor in parallel with flask web server. While Python (3) does not have *true* parallell multi threading because of GIL, Gloabl Interpreter Lock, this design is not affected because both threads are primarly I/O bound. The Flask server spends most of its time idle, waiting for HTTP requests, so GIL gets released and another thread can continue execution. As a result, the two threads cooperate efficiently, providing responsive real-time behavior and clean data handling. 
 
 ### Hardware
-(this part might need to be updated)
+(this part might need to be updated) ACS770xCB 
 
 A PCB has been designed and printed for the power electronics.
 
 components include:
 
- - 4 current sensors 
- - 2 opAmps 
+ - 4 current sensors ( ACS770xCB ) 
+ - 2 opAmps -> current to 0-3.3 V for ADC (conv. to ± 16 Amps via software)
  - 4 Relays
- - some resistors for voltage division of input source
+ - some resistors for voltage division of input source ex. AC mains (0-3.3V to ADC)
  - 1 Microcontroller Unit (MCU) - GIGADEVICE GD32VF103
- - 1 Single board computer - Raspberry pi 4 with 2 gb RAM
+ - 1 Single board computer - Raspberry pi 4 with 2 gb RAM ( tobe replaced )
 
 The MCU is placed on a small prototype board, connected with pin headers. Each input pin A1-A5 has a pull down resistor to a ground buss. 
-
-Each input pin should also have a wire before the pull down resistor to read a signal, this was however soldered wrong. My bad..// Karzan
