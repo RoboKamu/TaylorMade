@@ -11,7 +11,7 @@
 #define USE_USB
 #define USE_USB_PRINTF
 #define USB_BUFFER_SIZE 512 // from usb_serial_if.c
-
+#define BUFF_LEN        123 // ((sign + val)= 5 chars)) * 20 samples + (chx: = 4 chars) + 19 commas
 
 extern uint16_t adc_value[];
 
@@ -34,25 +34,26 @@ int main(void){
             
             char buffer[USB_BUFFER_SIZE];
 
-            char ch1_buf[100]; size_t offset_ch1=0;
-            char ch2_buf[100]; size_t offset_ch2=0;
-            char ch3_buf[100]; size_t offset_ch3=0;
-            char ch4_buf[100]; size_t offset_ch4=0;
-            char ch5_buf[100]; size_t offset_ch5=0;
+            char ch1_buf[BUFF_LEN]; size_t offset_ch1=0;
+            char ch2_buf[BUFF_LEN]; size_t offset_ch2=0;
+            char ch3_buf[BUFF_LEN]; size_t offset_ch3=0;
+            char ch4_buf[BUFF_LEN]; size_t offset_ch4=0;
+            char ch5_buf[BUFF_LEN]; size_t offset_ch5=0;
 
             for (uint8_t i=0; i<PERIOD_LENGTH; i++){
-                offset_ch1 += snprintf(ch1_buf+offset_ch1, 100-offset_ch1, "%d,", adc0_ch1_values[i]-2048);
-                offset_ch2 += snprintf(ch2_buf+offset_ch2, 100-offset_ch2, "%d,", adc0_ch2_values[i]-2048);
-                offset_ch3 += snprintf(ch3_buf+offset_ch3, 100-offset_ch3, "%d,", adc0_ch3_values[i]-2048);
-                offset_ch4 += snprintf(ch4_buf+offset_ch4, 100-offset_ch4, "%d,", adc0_ch4_values[i]-2048);
-                offset_ch5 += snprintf(ch5_buf+offset_ch5, 100-offset_ch5, "%d,", adc0_ch5_values[i]-2048);
+                offset_ch1 += snprintf(ch1_buf+offset_ch1, BUFF_LEN-offset_ch1, "%d,", adc0_ch1_values[i]-2048);
+                offset_ch2 += snprintf(ch2_buf+offset_ch2, BUFF_LEN-offset_ch2, "%d,", adc0_ch2_values[i]-2048);
+                offset_ch3 += snprintf(ch3_buf+offset_ch3, BUFF_LEN-offset_ch3, "%d,", adc0_ch3_values[i]-2048);
+                offset_ch4 += snprintf(ch4_buf+offset_ch4, BUFF_LEN-offset_ch4, "%d,", adc0_ch4_values[i]-2048);
+                offset_ch5 += snprintf(ch5_buf+offset_ch5, BUFF_LEN-offset_ch5, "%d,", adc0_ch5_values[i]-2048);
             }
             
-            // output =>  chx: 0,0,1,0.....,0 <-- 20 sample values
-            snprintf(buffer, USB_BUFFER_SIZE, "ch1: %s\nch2: %s\nch3: %s\nch4: %s\nch5: %s\n",  
-                                                ch1_buf, ch2_buf, ch3_buf, ch4_buf, ch5_buf);
-
-            printf("%s\n", buffer);
+            printf("ch1: %s\n", ch1_buf);
+            printf("ch2: %s\n", ch2_buf);
+            printf("ch3: %s\n", ch3_buf);
+            printf("ch4: %s\n", ch4_buf);
+            printf("ch5: %s\n", ch5_buf);
+            
             fflush(0);
         }
     }
