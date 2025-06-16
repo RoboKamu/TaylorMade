@@ -11,7 +11,7 @@ import time
 
 port = '/dev/ttyACM0'
 
-ser = serial.Serial(port, 9600, timeout=1)
+ser = serial.Serial(port, 115200, timeout=1)
 time.sleep(0.1) # wait 100 millis to stabalize
 
 print(f"Listening on {port}. Press Ctrl+C to exit. \n")
@@ -22,4 +22,4 @@ while True:
 	byte_string = ser.readline()
 	real_string = byte_string.decode('utf-8').strip()
 	print(f"{real_string} ", end='\n')
-	time.sleep(1)
+#	time.sleep(1)
