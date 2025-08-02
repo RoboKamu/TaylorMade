@@ -46,7 +46,7 @@ static void rcu_config(void){
 static void gpio_config(void){
     /** For some unclear reason the GPIO_MODE_IPD (pull down input mode) does not work for pin A0.
      * Therefor pins A1-A5 is used instead, and works as expected with relativly stable values. */
-    gpio_init(GPIOA, GPIO_MODE_IPD, GPIO_OSPEED_2MHZ, ADC_GPIO_PINS);   
+    gpio_init(GPIOA, GPIO_MODE_IPD, GPIO_OSPEED_50MHZ, ADC_GPIO_PINS);   
 }
 
 /*!
@@ -55,18 +55,6 @@ static void gpio_config(void){
     \retval     none
 */
 static void adc_config(void){
-
-    /** TODO: features
-     *  sooner: DONE!
-     *      ----Have a conversion at specific timings with a timer to trigger conversion. ----
-     *      note: ADC TRGO interrupt only works for TIMER2 not TIMER1 which was the first implementation
-     * 
-     *  later:
-     *      Have 1 channel on ADC0 and 4 channels on ADC1 then synch 
-     *      instead of ADC_MODE_FREE so channel 1 is parallell with every ADC1 channel
-     *      Then Voltage (A1) would be read in parallell with current (A2-A5) 
-     */
-
     // reset ADC 
     adc_deinit(ADC0);
     // configure ADC independent mode
@@ -81,11 +69,11 @@ static void adc_config(void){
     adc_channel_length_config(ADC0, ADC_REGULAR_CHANNEL, NUM_OF_ADC_CHANNELS);
     
     // ADC regular channel config
-    adc_regular_channel_config(ADC0, 0, ADC_CHANNEL_1, ADC_SAMPLETIME_239POINT5);
-    adc_regular_channel_config(ADC0, 1, ADC_CHANNEL_2, ADC_SAMPLETIME_239POINT5);
-    adc_regular_channel_config(ADC0, 2, ADC_CHANNEL_3, ADC_SAMPLETIME_239POINT5);
-    adc_regular_channel_config(ADC0, 3, ADC_CHANNEL_4, ADC_SAMPLETIME_239POINT5);
-    adc_regular_channel_config(ADC0, 4, ADC_CHANNEL_5, ADC_SAMPLETIME_239POINT5);
+    adc_regular_channel_config(ADC0, 0, ADC_CHANNEL_3, ADC_SAMPLETIME_239POINT5);
+    adc_regular_channel_config(ADC0, 1, ADC_CHANNEL_4, ADC_SAMPLETIME_239POINT5);
+    adc_regular_channel_config(ADC0, 2, ADC_CHANNEL_5, ADC_SAMPLETIME_239POINT5);
+    adc_regular_channel_config(ADC0, 3, ADC_CHANNEL_6, ADC_SAMPLETIME_239POINT5);
+    adc_regular_channel_config(ADC0, 4, ADC_CHANNEL_7, ADC_SAMPLETIME_239POINT5);
     
     // ADC timer trigger config, listen for TRGO on TIMER2 
     adc_external_trigger_source_config(ADC0, ADC_REGULAR_CHANNEL, ADC0_1_EXTTRIG_REGULAR_T2_TRGO);

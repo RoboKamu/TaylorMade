@@ -2,7 +2,6 @@ import numpy as np
 from datetime import datetime
 import csv
 import os
-import serial
 import time     # to display time taken on calculations
 
 class PowerMonitor:
@@ -11,12 +10,7 @@ class PowerMonitor:
         self.CYCLES = 50  # MCU sends data every 20ms, 50 cycles = 1 second
         self.cycle_counter = 0
         self.u_samples = np.array([])
-        self.i = 0
-        self.port = '/dev/ttyACM0'
-        self.ser = serial.Serial(self.port, 115200, timeout=1)
 
-        # P = u*i in real time, then the mean is calculated after enough samples gathered
-        # Other power calculations only need to be performed once
         # Separate raw (accumulating lists) from results (final values)
         self.channel_data_raw = {
             "ch1": {"Urms": []},
@@ -42,7 +36,7 @@ class PowerMonitor:
         y = np.asarray(flattened)
         X = np.fft.fft(y) # compute fft 
         N = len(X)
-        fs = 1000
+        fs = 1/N
         freq_axis = np.fft.fftfreq(N, d=1/fs)
         # remove bins under threshold
         threshold = 0.03 if ch != "ch1" else 5.0
@@ -57,27 +51,24 @@ class PowerMonitor:
         return np.sqrt(np.mean(np.square(y_recon)))
 
     def calc_active_power(self, u, i):
+        # P = u*i in real time, then the mean is calculated after enough samples gathered
         u = np.asarray(u)
         i = np.asarray(i)
         return np.mean(np.multiply(u, i))
 
-    def parse_line(self, line):
-        parts = line.split(':')
-        if len(parts) != 2:
-            return None, np.array([])
+    def parse_values(self, ch, values):
         try:
-            if parts[0] != 'ch1':
-                data = np.asarray([ (3.3*float(x)/4095) for x in parts[1].split(',') if x.strip() != ''])
-                # convert voltage reading from current sensor: 100mv = 1A
+            if ch == 'ch1':
+                data = np.asarray([ (3.3*float(x)/4095) for x in values ])
                 data = np.divide(data, 0.1)
             else:
-                data = np.asarray([float(x) for x in parts[1].split(',') if x.strip() != ''])
+                data = np.asarray(values)
                 tmp = np.mean(data)
-                data = 1617*(3.3*(data-tmp)/4095) 
+                data = 1617*(3.3*(data-tmp)/4095)
         except ValueError:
-            return None, np.array([])
-        
-        return parts[0], data
+            return np.asarray([])
+
+        return data
 
     def calc_power(self, ch):
         if ch == "ch1":
@@ -138,46 +129,36 @@ class PowerMonitor:
         for ch, vals in self.channel_data_result.items():
             print(f"{ch}: {vals}")
 
-    def run(self):
+    def run(self, ch, values):
         start_timer = time.time()
-        while True:
-            try:
-                byte_string = self.ser.readline()
-                try:
-                    line = byte_string.decode('utf-8').strip()
-                except UnicodeDecodeError:
-                    continue
+        try:
+            values = self.parse_values(ch, values)
 
-                ch, values = self.parse_line(line)
-                if ch is None or ch not in self.channel_data_raw:
-                    continue
+            if ch == 'ch1':
+                if len(values) != 100: 
+                    return
+                self.u_samples = values
+                self.channel_data_raw[ch]["Urms"].append(values)
+                return
+            
+            if len(values) != 100 or len(self.u_samples) != 100:
+                return    # skip if either set incomplete
 
-                if ch == 'ch1':
-                    if len(values) != 20: continue
-                    self.u_samples = values
-                    self.channel_data_raw[ch]["Urms"].append(values)
-                    continue
-                
-                if len(values) != 20 or len(self.u_samples) != 20:
-                    continue    # skip if either set incomplete
+            self.channel_data_raw[ch]["Irms"].append(values)
+            self.channel_data_raw[ch]["P"].append(self.calc_active_power(self.u_samples, values*(-1)))
 
-                self.channel_data_raw[ch]["Irms"].append(values)
-                self.channel_data_raw[ch]["P"].append(self.calc_active_power(self.u_samples, values*(-1)))
+            if ch == 'ch5':
+                self.cycle_counter += 1
+                if self.cycle_counter == self.CYCLES:
+                    self.cycle_counter = 0
+                    for ch_key in self.channel_data_raw:
+                        self.calc_power(ch_key)
+                    
+                    self.log_to_csv()
+                    self.display_monitor() # debug to terminal
+                    print(time.time()-start_timer)
+                    start_timer = time.time()
+                    self.clear_raw()
 
-                if ch == 'ch5':
-                    self.cycle_counter += 1
-                    if self.cycle_counter == self.CYCLES:
-                        self.cycle_counter = 0
-                        for ch_key in self.channel_data_raw:
-                            self.calc_power(ch_key)
-                        
-                        self.log_to_csv()
-                        self.display_monitor() # debug to terminal
-                        print(time.time()-start_timer)
-                        start_timer = time.time()
-                        self.clear_raw()
-
-            except KeyboardInterrupt:
-                print("KEY_ITRPT..Exiting..\n")
-                self.ser.close()
-                break;
+        except KeyboardInterrupt:
+            print("KEY_ITRPT..Exiting..\n")

@@ -5,7 +5,7 @@
     \brief  TIMER2 driver interface   
 
     This file defines the interface for the timer configuration.
-    The timer triggers an TRGO interrupt every millisecond 
+    The timer triggers an TRGO interrupt every 200 us 
 */
 
 #include "gd32vf103.h"

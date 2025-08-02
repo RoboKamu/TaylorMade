@@ -18,8 +18,7 @@ Furthermore the cycles per conversoin is set to 239.5, the maximum. This is then
 #### Fast scanning
 239.5 cycles per conv. => 239.5 * (1 / 12 MHz ) ≈ 20 microseconds / channel
 
-signal period of 20ms => 20us / 20ms = 0.0001 = 0.1% phase error per channel (max 0.5%). 
-This is negligable. 
+signal period of 20ms => 20us / 20ms = 0.0001 = 0.1% phase error per channel (max 0.5% on last channel). 
 
 #### Further improvements (not implemented)
 Improvements of phase error can be make with parallell sampling. Using one channel (ADC0) for voltage and 4 others (ADC1). Each channel on ADC1 converts in parallel with ADC0 then.

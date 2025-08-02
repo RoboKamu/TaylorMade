@@ -1,138 +1,131 @@
-import base64
-from datetime import datetime
-from io import BytesIO
+#!/usr/bin/env python3
+
+from flask import Flask
+from waitress import serve
+from server import app
 import os
-import pandas as pd
-from flask import Flask, request, jsonify, render_template, redirect, url_for
-import atexit
 
-from matplotlib.figure import Figure
-import matplotlib.dates as mdates
-import RPi.GPIO as GPIO
+import pigpio
+import spidev
 
-app = Flask(__name__)
+import time
+from collections import deque
+from classes.MonitorClass import PowerMonitor
 
-# Set up GPIO
-GPIO.setmode(GPIO.BCM)
-output_pins = {
-    1: 27,
-    2: 22,
-    3: 23,
-    4: 24,
-}
+def find_sync(raw):
+    for i in range(len(raw) - 1):
+        if raw[i] == 0x01 and raw[i+1] == 0xA4:
+            return i
+    return -1
 
-# Set up all pins as outputs
-for pin in output_pins.values():
-    GPIO.setup(pin, GPIO.OUT)
-    GPIO.output(pin, GPIO.LOW)
+def add_channel_data(ch1, ch2, ch3, ch4, ch5, val):
+    if val == 0x01A4:
+        return
 
-# Global button states
-button_states = {
-    1: False,
-    2: False,
-    3: False,
-    4: False,
-}
+    match (val >> 12):
+        case 1:
+            ch1.append(val & 0x0FFF)
+        case 2:
+            ch2.append(val & 0x0FFF)
+        case 3:
+            ch3.append(val & 0x0FFF)
+        case 4:
+            ch4.append(val & 0x0FFF)
+        case 5:
+            ch5.append(val & 0x0FFF)
+        case _:
+            print("DBG --> HERE WEIRD NIBBLE: {}, val: {} = {}\n".format(val>>12, hex(val), val))
+            time.sleep(0.0001)
+            return -1
 
-@app.route('/')
-def home():
-    return render_template('index.html', button_states=button_states, output_pins=output_pins)
+def calc_process(queue, monitor):
+    while True:
+        if queue.empty():
+            time.sleep(0.000010) # wait 10 us 
+            continue
 
-@app.route("/today.html")
-def today_view():
-    timestamp = datetime.now().replace(microsecond=0)
-    date_path = timestamp.strftime("logs/%Y/%m/%d")
+        data = queue.get()
 
-    measurements = ["Urms", "Irms", "P", "Q", "S", "PF"]
-    chart_images = {}
-    
-
-    try:
-        channel_files = [f for f in os.listdir(date_path) if f.endswith(".csv")]
-
-        # read CSV data
-        # Structure: measurements -> {channel: (x, y)}
-        data_by_measurement = {m : {} for m in measurements}
-        for file in channel_files:
-            ch_name = os.path.splitext(file)[0] # ex. "ch2"
-            filepath = os.path.join(date_path, file)
-            df = pd.read_csv(filepath, parse_dates=["timestamp"])
-
-            for m in measurements:
-                if m in df.columns:
-                    data_by_measurement[m][ch_name] = (df["timestamp"], df[m])
+        # reconstruct to 16 bits integers
+        result = [data[i] << 8 | data[i+1] for i in range(0, len(data), 2)]
+        #print(bytesToHex(result))
+        if len(result) < 501:
+            print("SOMEHTING DROPPED") 
+            time.sleep(1)
         
-        for m, ch_data in data_by_measurement.items():
-            # create figure without pyplot
-            fig = Figure()
-            ax = fig.subplots()
+        ch1 = []
+        ch2 = []
+        ch3 = []
+        ch4 = []
+        ch5 = []
 
-            for ch, (x, y) in ch_data.items():
-                ax.plot(x, y, label=ch)
+        for val in result:
+            err = add_channel_data(ch1, ch2, ch3, ch4, ch5, val)
+            if err:
+                continue
 
-            ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
-            fig.autofmt_xdate()
+        ch_arr = { "ch1": ch1, "ch2": ch2, "ch3": ch3, "ch4": ch4, "ch5": ch5 }
+        
+        for ch, value in ch_arr.items():
+            monitor.run(ch, value)
 
-            ax.set_title(f"Chart {m}")
-            ax.legend(loc='upper left')
-            fig.tight_layout()
+def cbf_gpio(gpio, level, tick):
+    time.sleep(0.000010)  # 10 us delay
+    #print("GPIO {} is {}".format(gpio, level))
+    
+    # duplex read SPI (8 bit words)
+    raw_bytes = Spi.xfer([0x00] * 1002)    
 
-            # convert plot to PNG image as base64
-            buf = BytesIO()
-            fig.savefig(buf, format="png")
-            buf.seek(0)
-            chart_data = base64.b64encode(buf.getvalue()).decode("ascii")
-            chart_images[m] = chart_data
+    # shift to start bit 
+    sync_idx = find_sync(raw_bytes)
+    if (sync_idx == -1):
+        print("sync not found, discard... " )
+        return
+    uint8_data = deque(raw_bytes)
+    uint8_data.rotate(-sync_idx)
+    queue.put(uint8_data)
 
-    except Exception as e:
-        print(f"Error: {e}")
-        # failed to parse csv 
-        chart_images = {}
+def setup_gpio(GPIO: int):
+    if not Pi.connected:
+       exit()
 
-    return render_template("today.html", charts=chart_images)
+    # enable pull down on the GPIO
+    Pi.set_pull_up_down(GPIO, pigpio.PUD_DOWN)
+    # define a toggle interrupt on the GPIO 
+    Pi.callback(GPIO, pigpio.EITHER_EDGE, cbf_gpio) 
 
-@app.route("/history.html")
-def history_view():
-    return render_template("history.html")
+def spi_init_params(Spi):
+    Spi.max_speed_hz = 5_120_000
+    Spi.mode = 0b11
+#    os.nice() # prioritize SPI over server
 
+def bytesToHex(data):
+    return ''.join(["0x%04X " % x for x in data]).strip()
 
-@app.route('/toggle/<int:button_id>')
-def toggle(button_id):
-    if button_id in button_states:
-        button_states[button_id] = not button_states[button_id]
-        GPIO.output(output_pins[button_id], GPIO.HIGH if button_states[button_id] else GPIO.LOW)
-    return redirect(url_for('home'))
-
-@app.route("/ON")
-def turn_on():
-    port = int(request.args.get("port"))
-    button_states[port] = True
-    GPIO.output(output_pins[port], GPIO.HIGH)
-    return '', 204
-
-@app.route("/OFF")
-def turn_off():
-    port = int(request.args.get("port"))
-    button_states[port] = False
-    GPIO.output(output_pins[port], GPIO.LOW)
-    return '', 204
-
-@app.route("/portstatus")
-def port_status():
-    return jsonify(button_states)
-
-
-@atexit.register
-def cleanup():
-    GPIO.cleanup()
-
-# configure Thread for power moonitor
-from classes.power_monitor import PowerMonitor
-from threading import Thread
-
-monitor = PowerMonitor()
+#import threading
+from multiprocessing import Process, Queue
 
 if __name__ == "__main__":
-    t = Thread(target=monitor.run, daemon=True)
-    t.start()
-    app.run(host="0.0.0.0", port=5000)  # change host to router IP
+    monitor = PowerMonitor()
+    queue = Queue()
+    p1 = Process(target=calc_process, args=(queue,monitor,))
+    p1.start()
+
+    try:
+        Pi = pigpio.pi()
+        Spi = spidev.SpiDev()
+
+        Spi.open(0, 0)
+        spi_init_params(Spi)
+        Spi.xfer([0x00] * 1002) # garbage first pull
+        setup_gpio(4)
+        
+        print("Server is live at: ")
+        os.system('hostname -I')
+        serve(app, listen='*:8080', threads=1)
+        print("...server closed\n")
+
+    finally:
+        print("closing...\n")
+        Spi.close()
+        Pi.stop()

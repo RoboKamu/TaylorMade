@@ -2,9 +2,9 @@
     \file   timer.c
     \brief  TIMER2 driver implementation
 
-    50 Hz input signal, 1 sample / ms on 5 channels, with adc in scan mode.
+    50 Hz input signal, timer as master/slave mode with adc in scan mode.
     The timers role is to trigger the ADC to start a conversion on the 5 channels.
-    For 1 sample / ms a interrupt is triggered every ms with TIMER2 TRGO
+    For 5 sample / ms a interrupt is triggered every 200 us with TIMER2 TRGO
 */
 
 #include "timer.h"
@@ -55,7 +55,7 @@ static void timer_config(void){
     timer_initpara.prescaler            = 95;   // each step 1us 
     timer_initpara.alignedmode          = TIMER_COUNTER_EDGE;
     timer_initpara.counterdirection     = TIMER_COUNTER_UP;
-    timer_initpara.period               = 999;  // overflow after 1000us (autoreload every ms)
+    timer_initpara.period               = 199;  // overflow after 200us (5 autoreloads every ms)
     timer_initpara.clockdivision        = TIMER_CKDIV_DIV1;
     timer_initpara.repetitioncounter    = 0;
     timer_init(TIMER2, &timer_initpara);
