@@ -1,0 +1,10 @@
+Flask==3.1.1
+matplotlib==3.10.5
+numpy==2.3.2
+pandas==2.3.1
+pigpio==1.78
+pyserial==3.5
+RPi.GPIO==0.7.1
+spidev==3.7
+waitress==3.0.2
+
