@@ -1,49 +1,42 @@
-> [!NOTE]
-> Main prototype complete but a revision of the web software as well as the hardware is in progress.
+# TaylorMade - General purpose 4 load power monitor 
+
+![Taylormade-prototype-4-sockets](readme-files/taylormade-prototype.png)
+TaylorMade prototype at rest 
+
+3D model made by collaborator: Adam Younes
 
 ### Firmware
 
-Currently the firmware development is complete. One update that may occur is that the amount of periods/cycles being sampled increases, so going from sampling just one period (20 samples) to maybe 2 periods (40 samples) for more accurate RMS calculations and edge cases. 
+Current update now samples 5 times as many samples with a total of 100 samples per period compared to the old 20 samples per period. 
 
 Firmware overview:
- - A timer is used to trigger an TRGO interrupt every ms 
+ - A timer is used to trigger an TRGO interrupt every 200 us 
  - This triggers the ADC to start conversion of 5 channels 
  - The ADC starts then converting all channels once with 20 us / channel (read more in ADC/ folder)
  - ADC stops once 5 channels converted and waits for the next timer interrupt flag
  - Every conversion is stored in a DMA buffer
- - Once DMA buffer has reached 100 samples (20 per channel) an interrupts trigger
- - The DMA interrupt handler saves the buffer values into arrays for each channel and notes USB buffer as ready
- - Lastly the superloop (main.c) sees the USB buffer as ready and sends readings over Serial port 
+ - Once DMA buffer has reached 500 samples (100 per channel) an interrupt triggers
+ - The DMA ISR converts DMA buffer to byte sized array with a channel identification nibble and sets GPIO ON 
+ - RPi has a change-of-state interrupt on the GPIO and sends SPI request
+ - Each request triggers an interrupt on the MCU for SPI and the ISR transfers one byte to the RPi
+ - For lack of FIFO on SPI slave, shift array to start flag on the RPi
+ - Lastly the RPi splits into respective channel buffer based on most significant nibble on reconstructed 16-bit array and initiates calculations 
 
 ### Software
 
-The website is still being developed. Getting the flask server running, controlling raspberry pi GPIO, and data analysis works but some frontend features like "history" and WSGI server is in development. 
+Website complete with the exception of the "history" tab. Now uses Waitress, WSGI, instead of running flask debug server. 
 
-While it is in development, some small scrips have been created to just read the Serial port readings
+**NOTE: I have developed the firmware and python scripts in a GNU/Linux enviorment so if new firmware is desired then the Makefile has to be swapped**
 
-**NOTE: I have developed the firmware and python scripts in a GNU/Linux enviorment so if new firmware is desired then the Makefile has to be swapped and the python script port variable has to be changed**
+The software not uses multiprocessing instead of multithreading becuase of more demanding calculations, as well as blocking SPI reads. One improvement that can be done is to generate graphs from its own process, a nasty work around is to continue updating data but only update graph once refreshed. 
 
-Changing the port variable to read Serial port based on OS:
+![dft-on-ADC](readme-files/dft-showcase.png)
 
-    port = '' # change this to serial port location variable
-    port = '/dev/ttyACM0'           # for linux (debian)
-    # port = /dev/tty.usbmodem1101  # ex. for MACOS - found via: ls /dev/tty.usb*
-    # port = 'COM3'                 # ex. Windows - found via Device Manager -> Ports (COM & LPT) -> find something like "USB Serial Device (COM3)" (?)
-
-In `app.py`, the application uses pythons `threading.Thread` to read serial monitor in parallel with flask web server. While Python (3) does not have *true* parallell multi threading because of GIL, Gloabl Interpreter Lock, this design is not affected because both threads are primarly I/O bound. The Flask server spends most of its time idle, waiting for HTTP requests, so GIL gets released and another thread can continue execution. As a result, the two threads cooperate efficiently, providing responsive real-time behavior and clean data handling. 
+Example of the results/output of the filtering process of the ADC values. This is with a load. 
 
 ### Hardware
-(this part might need to be updated) ACS770xCB 
+![hardwareschematic](readme-files/hardware.png)
 
-A PCB has been designed and printed for the power electronics.
+Made by collaborator: Skuttispower
 
-components include:
-
- - 4 current sensors ( ACS770xCB ) 
- - 2 opAmps -> current to 0-3.3 V for ADC (conv. to ± 16 Amps via software)
- - 4 Relays
- - some resistors for voltage division of input source ex. AC mains (0-3.3V to ADC)
- - 1 Microcontroller Unit (MCU) - GIGADEVICE GD32VF103
- - 1 Single board computer - Raspberry pi 4 with 2 gb RAM ( tobe replaced )
-
-The MCU is placed on a small prototype board, connected with pin headers. Each input pin A1-A5 has a pull down resistor to a ground buss. 
+The MCU and RPi is placed on a small prototype board, connected with pin headers. Each input pin on ADC has a pull down resistor to a ground buss. 
