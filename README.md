@@ -40,3 +40,9 @@ Example of the results/output of the filtering process of the ADC values. This i
 Made by collaborator: Skuttispower
 
 The MCU and RPi is placed on a small prototype board, connected with pin headers. Each input pin on ADC has a pull down resistor to a ground buss. 
+
+# Showcase
+
+https://github.com/user-attachments/assets/e7613a2c-53ce-4c46-9b37-75e01b1198a9
+
+This is a compressed demo. First, the user turn on 4 device. Then, the user analyzes the graphs showing voltage, active/reactive/apparent power as well as power factor on the site. Lastly, the user turn off all devices and show all of the power graphs going towards zero. Left side of monitor show a debug terminal displaying the measured power values in clear numbers.  
