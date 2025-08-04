@@ -50,7 +50,17 @@
   <script>
     function togglePort(port, state) {
       fetch(`/${state ? 'ON' : 'OFF'}?port=${port}`)
-		.then(() => updateStatus());
+        .then(response => {
+          if (!response.ok) {
+            return response.json().then(err => {
+              alert(`Error: ${err.error || 'Invalid request'}`);
+            });
+          }
+          updateStatus();
+        })
+        .catch(() => {
+          alert("Network error. Could not send request.");
+        });
     }
 
     async function updateStatus() {
