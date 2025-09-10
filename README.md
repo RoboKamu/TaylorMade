@@ -1,6 +1,7 @@
 # TaylorMade - General purpose 4 load power monitor 
 
 ![Taylormade-prototype-4-sockets](readme-files/taylormade-prototype.png)
+
 TaylorMade prototype at rest 
 
 3D model made by collaborator: Adam Younes
@@ -43,6 +44,6 @@ The MCU and RPi is placed on a small prototype board, connected with pin headers
 
 # Showcase
 
-https://github.com/user-attachments/assets/e7613a2c-53ce-4c46-9b37-75e01b1198a9
+https://github.com/user-attachments/assets/2e78821d-a607-4e2f-887a-9635c300f699
 
 This is a compressed demo. First, the user turn on 4 device. Then, the user analyzes the graphs showing voltage, active/reactive/apparent power as well as power factor on the site. Lastly, the user turn off all devices and show all of the power graphs going towards zero. Left side of monitor show a debug terminal displaying the measured power values in clear numbers.  
