@@ -12,6 +12,8 @@ import time
 from collections import deque
 from classes.MonitorClass import PowerMonitor
 
+from multiprocessing import Process, Queue
+
 def find_sync(raw):
     for i in range(len(raw) - 1):
         if raw[i] == 0x01 and raw[i+1] == 0xA4:
@@ -102,8 +104,6 @@ def spi_init_params(Spi):
 def bytesToHex(data):
     return ''.join(["0x%04X " % x for x in data]).strip()
 
-#import threading
-from multiprocessing import Process, Queue
 
 if __name__ == "__main__":
     monitor = PowerMonitor()
@@ -129,3 +129,4 @@ if __name__ == "__main__":
         print("closing...\n")
         Spi.close()
         Pi.stop()
+
