@@ -156,7 +156,7 @@ Hardware schematic and PCB by collaborator: Skuttispower
 
 This project was made possible with the collaboration of Professor Nathaniel Taylor, supervising the usage of AC mains and providing support and ideas. 
 
-Link to professor profile page: ![here](https://www.kth.se/profile/taylor/)
+Link to professor profile page: [here](https://www.kth.se/profile/taylor/)
 
 # Showcase
 
