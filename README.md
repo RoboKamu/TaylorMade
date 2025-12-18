@@ -11,7 +11,7 @@
 
 Current update now samples 5 times as many samples with a total of 100 samples per period compared to the old 20 samples per period. 
 
-Firmware overview:
+Firmware overview (detailed):
  - A timer is used to trigger an TRGO interrupt every 200 us 
  - This triggers the ADC to start conversion of 5 channels 
  - The ADC starts then converting all channels once with 20 us / channel (read more in ADC/ folder)
@@ -24,11 +24,11 @@ Firmware overview:
  - For lack of FIFO on SPI slave, shift array to start flag on the RPi
  - Lastly the RPi splits into respective channel buffer based on most significant nibble on reconstructed 16-bit array and initiates calculations 
 
+<img width="1654" height="109" alt="image" src="https://github.com/user-attachments/assets/9243a67e-291f-4fc2-8224-c49bce0a69a2" />
+
+Figure: High-level firmware data flow on the microcontroller, from timer-triggered ADC sampling to SPI data transfer.
+
 **NOTE: I have developed the firmware and python scripts in a GNU/Linux enviorment so if new firmware is desired then the Makefile has to be changed**
-
-### Responsible
-
-Firmware by collaborator: RoboKamu (Karzan M.)
 
 ## Software
 
@@ -66,16 +66,6 @@ The software now uses multiprocessing instead of multithreading for calculations
   </tr>
 </table>
 
-
-### Responsible
-
-Data analysis / calculations, SPI & ISR logic, and server configuration by collaborator: RoboKamu (Karzan M.)
-
-Port status, button logic, UI, and FLASK & GPIO integration  (Python, RPi) by collaborator: Pavel1a 
-
-Flask templates and UI (HTML, CSS, Javascript) by collaborator: Krille04
-
-Logging of values to CSV by collaborator: Adam Younes
 
 ## Hardware
 
@@ -117,9 +107,6 @@ The 4 blue wires on the PCB show the current sensor outputs after the amplifying
 
 The MCU and RPi is placed on a small prototype board, connected with pin headers. Each input pin on ADC has a pull down resistor to a ground buss. 
 
-### Responsible
-
-Hardware schematic and PCB by collaborator: Skuttispower
 
 ## 3D design 
 
@@ -156,10 +143,20 @@ Hardware schematic and PCB by collaborator: Skuttispower
 
 This project was made possible with the collaboration of Professor Nathaniel Taylor, supervising the usage of AC mains and providing support and ideas. 
 
-Link to professor profile page: [here](https://www.kth.se/profile/taylor/)
+Link to professor public profile page: [here](https://www.kth.se/profile/taylor/)
 
 # Showcase
 
 https://github.com/user-attachments/assets/2e78821d-a607-4e2f-887a-9635c300f699
 
 This is a compressed demo. First, the user turn on 4 device. Then, the user analyzes the graphs showing voltage, active/reactive/apparent power as well as power factor on the site. Lastly, the user turn off all devices and show all of the power graphs going towards zero. Left side of monitor show a debug terminal displaying the measured power values in clear numbers.  
+
+## Contributors
+
+This was a collaborative course project. The roles below indicate **primary areas of responsibility**; all contributors participated in design discussions, reviews, and problem-solving.
+
+- RoboKamu (Karzan M.) – Firmware, data analysis, SPI & ISR logic
+- Pavel1a – RPi integration, UI logic, GPIO & Flask backend
+- Krille04 – Frontend templates (HTML, CSS, JS)
+- Adam Younes – Data logging, 3D design
+- Skuttispower – Hardware schematic and PCB design
